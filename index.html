@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Chat</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    #chat { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    #msg { width: 80%; }
+    #send { width: 18%; }
+  </style>
+</head>
+<body>
+  <h2>🔴 Real-Time Chat</h2>
+  <div id="chat"></div>
+  <input id="msg" type="text" placeholder="Type a message..." />
+  <button id="send">Send</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const msgInput = document.getElementById("msg");
+    const sendBtn = document.getElementById("send");
+
+    // Connect to WebSocket server
+    const socket = new WebSocket("wss://<your-backend-url>.onrender.com/ws");
+
+    socket.onmessage = function(event) {
+      const message = document.createElement("div");
+      message.textContent = "👤 " + event.data;
+      chat.appendChild(message);
+      chat.scrollTop = chat.scrollHeight;
+    };
+
+    sendBtn.onclick = () => {
+      const text = msgInput.value;
+      socket.send(text);
+      const selfMsg = document.createElement("div");
+      selfMsg.textContent = "🧑‍💻 You: " + text;
+      selfMsg.style.fontWeight = "bold";
+      chat.appendChild(selfMsg);
+      chat.scrollTop = chat.scrollHeight;
+      msgInput.value = "";
+    };
+  </script>
+</body>
+</html>
