@@ -24,6 +24,16 @@
     // Connect to WebSocket server
 
     const socket = new WebSocket(`wss://${location.host}/ws`);
+    
+
+socket.onopen = () => {
+    document.querySelector("h2").innerHTML = "🟢 Real-Time Chat";
+};
+
+socket.onclose = () => {
+    document.querySelector("h2").innerHTML = "🔴 Real-Time Chat";
+};
+
 
 
 
