@@ -1,68 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Real-Time Chat</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #chatbox {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #aaa;
-            padding: 10px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
-        }
-        #input {
-            width: 80%;
-        }
-        #sendBtn {
-            width: 18%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>WebSocket Chatbot</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 30px; }
+    #chat { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    .msg { margin: 10px 0; }
+    .user { text-align: right; color: blue; }
+    .bot { text-align: left; color: green; }
+  </style>
 </head>
 <body>
-    <h2>🔴 Real-Time Chat</h2>
-    <div id="chatbox"></div>
-    <input type="text" id="input" placeholder="Type a message..."/>
-    <button id="sendBtn">Send</button>
+  <div id="chat">
+    <h2>💬 Real-time Chatbot</h2>
+    <div id="messages"></div>
+    <input id="input" type="text" placeholder="Type your message..." autofocus>
+    <button onclick="sendMessage()">Send</button>
+  </div>
 
-    <script>
-        const socket = new WebSocket(`ws://${location.host}/ws`);
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    const input = document.getElementById("input");
+    const messages = document.getElementById("messages");
 
-        socket.onopen = () => {
-            document.querySelector("h2").innerHTML = "🟢 Real-Time Chat";
-        };
+    socket.on('message', function(msg) {
+      appendMessage('bot', msg);
+    });
 
-        socket.onclose = () => {
-            document.querySelector("h2").innerHTML = "🔴 Real-Time Chat";
-        };
+    function sendMessage() {
+      const text = input.value;
+      if (text.trim() !== "") {
+        appendMessage('user', text);
+        socket.send(text);
+        input.value = '';
+      }
+    }
 
-        socket.onmessage = (event) => {
-            const chatbox = document.getElementById("chatbox");
-            const msg = document.createElement("div");
-            msg.innerHTML = `👤 Stranger: ${event.data}`;
-            chatbox.appendChild(msg);
-            chatbox.scrollTop = chatbox.scrollHeight;
-        };
+    function appendMessage(sender, text) {
+      const div = document.createElement("div");
+      div.className = "msg " + sender;
+      div.textContent = (sender === 'user' ? "You: " : "Bot: ") + text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
 
-        const input = document.getElementById("input");
-        const sendBtn = document.getElementById("sendBtn");
-
-        sendBtn.onclick = () => {
-            const message = input.value;
-            if (message) {
-                const chatbox = document.getElementById("chatbox");
-                const msg = document.createElement("div");
-                msg.innerHTML = `🧑‍💻 You: ${message}`;
-                chatbox.appendChild(msg);
-                socket.send(message);
-                input.value = "";
-                chatbox.scrollTop = chatbox.scrollHeight;
-            }
-        };
-    </script>
+    // Enter key to send
+    input.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
 </body>
 </html>
