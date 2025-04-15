@@ -1,59 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Real-Time Chat</title>
-  <style>
-    body { font-family: Arial; margin: 30px; }
-    #chat { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    #msg { width: 80%; }
-    #send { width: 18%; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Real-Time Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chatbox {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #aaa;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        #input {
+            width: 80%;
+        }
+        #sendBtn {
+            width: 18%;
+        }
+    </style>
 </head>
 <body>
-  <h2>🔴 Real-Time Chat</h2>
-  <div id="chat"></div>
-  <input id="msg" type="text" placeholder="Type a message..." />
-  <button id="send">Send</button>
+    <h2>🔴 Real-Time Chat</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="input" placeholder="Type a message..."/>
+    <button id="sendBtn">Send</button>
 
-  <script>
-    const chat = document.getElementById("chat");
-    const msgInput = document.getElementById("msg");
-    const sendBtn = document.getElementById("send");
+    <script>
+        const socket = new WebSocket(`ws://${location.host}/ws`);
 
-    // Connect to WebSocket server
+        socket.onopen = () => {
+            document.querySelector("h2").innerHTML = "🟢 Real-Time Chat";
+        };
 
-    const socket = new WebSocket(`wss://${location.host}/ws`);
-    
+        socket.onclose = () => {
+            document.querySelector("h2").innerHTML = "🔴 Real-Time Chat";
+        };
 
-socket.onopen = () => {
-    document.querySelector("h2").innerHTML = "🟢 Real-Time Chat";
-};
+        socket.onmessage = (event) => {
+            const chatbox = document.getElementById("chatbox");
+            const msg = document.createElement("div");
+            msg.innerHTML = `👤 Stranger: ${event.data}`;
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        };
 
-socket.onclose = () => {
-    document.querySelector("h2").innerHTML = "🔴 Real-Time Chat";
-};
+        const input = document.getElementById("input");
+        const sendBtn = document.getElementById("sendBtn");
 
-
-socket.onmessage = function(event) {
-    const message = event.data;
-    const chatBox = document.getElementById("chatbox");
-    const msgDiv = document.createElement("div");
-    msgDiv.innerHTML = `<span>👤 Stranger:</span> ${message}`;
-    chatBox.appendChild(msgDiv);
-};
-
-
-    sendBtn.onclick = () => {
-      const text = msgInput.value;
-      socket.send(text);
-      const selfMsg = document.createElement("div");
-      selfMsg.textContent = "🧑‍💻 You: " + text;
-      selfMsg.style.fontWeight = "bold";
-      chat.appendChild(selfMsg);
-      chat.scrollTop = chat.scrollHeight;
-      msgInput.value = "";
-    };
-  </script>
+        sendBtn.onclick = () => {
+            const message = input.value;
+            if (message) {
+                const chatbox = document.getElementById("chatbox");
+                const msg = document.createElement("div");
+                msg.innerHTML = `🧑‍💻 You: ${message}`;
+                chatbox.appendChild(msg);
+                socket.send(message);
+                input.value = "";
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+        };
+    </script>
 </body>
 </html>
