@@ -35,15 +35,14 @@ socket.onclose = () => {
 };
 
 
+socket.onmessage = function(event) {
+    const message = event.data;
+    const chatBox = document.getElementById("chatbox");
+    const msgDiv = document.createElement("div");
+    msgDiv.innerHTML = `<span>👤 Stranger:</span> ${message}`;
+    chatBox.appendChild(msgDiv);
+};
 
-
-
-    socket.onmessage = function(event) {
-      const message = document.createElement("div");
-      message.textContent = "👤 " + event.data;
-      chat.appendChild(message);
-      chat.scrollTop = chat.scrollHeight;
-    };
 
     sendBtn.onclick = () => {
       const text = msgInput.value;
