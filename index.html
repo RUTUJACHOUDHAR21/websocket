@@ -22,7 +22,7 @@
     const sendBtn = document.getElementById("send");
 
     // Connect to WebSocket server
-    const socket = new WebSocket("wss://<your-backend-url>.onrender.com/ws");
+    const socket = new WebSocket("https://websocket-2-v82q.onrender.com");
 
     socket.onmessage = function(event) {
       const message = document.createElement("div");
